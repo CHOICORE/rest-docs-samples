@@ -1,12 +1,15 @@
+import com.epages.restdocs.apispec.gradle.OpenApi3Task
+
 plugins {
     java
     id("org.springframework.boot") version "3.2.3"
     id("io.spring.dependency-management") version "1.1.4"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
+    id("com.epages.restdocs-api-spec") version "0.19.2"
 }
 
 group = "me.choicore.study"
-version = "0.0.1-SNAPSHOT"
+version = "1.0.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -29,84 +32,49 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
+    testImplementation("com.epages:restdocs-api-spec-mockmvc:0.19.2")
     "asciidoctorExt"("org.springframework.restdocs:spring-restdocs-asciidoctor")
 }
-// val snippetsDir by extra { file("build/generated-snippets") }
-//
-// tasks.test {
-//    useJUnitPlatform {
-//        excludeTags("restdocs")
-//    }
-// }
-//
-// tasks.asciidoctor {
-//    dependsOn("restdocsTest")
-//    inputs.dir(snippetsDir)
-//    configurations("asciidoctorExt")
-//    baseDirFollowsSourceFile()
-// }
-//
-// tasks.register("restdocsTest", Test::class) {
-//    group = "verification"
-//    outputs.dir(snippetsDir)
-//    useJUnitPlatform {
-//        includeTags("restdocs")
-//    }
-// }
-//
-// tasks.bootJar {
-//    dependsOn(tasks.asciidoctor)
-//    from(tasks.asciidoctor.get().outputDir) {
-//        into("static/docs")
-//    }
-// }
-// tasks.test {
-//    useJUnitPlatform {
-//        excludeTags("restdocs")
-//    }
-// }
-//
-// tasks.asciidoctor {
-//    dependsOn("restdocsTest")
-//    configurations("asciidoctorExt")
-//    baseDirFollowsSourceFile()
-// }
-//
-// tasks.register<Test>("restdocsTest") {
-//    group = "verification"
-//    useJUnitPlatform {
-//        includeTags("restdocs")
-//    }
-// }
-//
-// tasks.bootJar {
-//    dependsOn(tasks.asciidoctor)
-//    from(tasks.asciidoctor.get().outputDir) {
-//        into("static/docs")
-//    }
-// }
 
-tasks {
-
-    test { useJUnitPlatform { excludeTags("restdocs") } }
-
-    create("restdocsTest", Test::class) {
-        group = "verification"
-        useJUnitPlatform {
-            includeTags("restdocs")
-        }
+tasks.register<Test>("restdocsTest") {
+    group = "verification"
+    useJUnitPlatform {
+        includeTags("restdocs")
     }
+}
 
-    asciidoctor {
-        dependsOn("restdocsTest")
-        configurations("asciidoctorExt")
-        baseDirFollowsSourceFile()
-    }
+tasks.withType<OpenApi3Task> {
+    dependsOn("restdocsTest")
+}
 
-    bootJar {
-        dependsOn(asciidoctor)
-        from(asciidoctor.get().outputDir) {
-            into("static/docs")
-        }
+tasks.register<Copy>("copyOasToSwaggerUI") {
+    dependsOn("openapi3")
+    val staticResourcesDir = "src/main/resources/static"
+    val openapi3Filename = "${openapi3.outputFileNamePrefix}.${openapi3.format}"
+
+    doFirst {
+        delete("${layout.projectDirectory}/$staticResourcesDir/$openapi3Filename")
     }
+    from("${layout.buildDirectory.get()}/api-spec/$openapi3Filename")
+    into(staticResourcesDir)
+}
+
+tasks.test {
+    useJUnitPlatform {
+        excludeTags("restdocs")
+    }
+}
+
+tasks.asciidoctor {
+    dependsOn("restdocsTest")
+    configurations("asciidoctorExt")
+    baseDirFollowsSourceFile()
+}
+
+openapi3 {
+    setServer("http://localhost:8080")
+    title = "Sample API"
+    description = "This is a sample API"
+    version = "${project.version}"
+    format = "json"
 }

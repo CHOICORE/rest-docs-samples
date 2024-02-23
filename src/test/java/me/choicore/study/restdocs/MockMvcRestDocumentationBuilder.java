@@ -1,7 +1,8 @@
 package me.choicore.study.restdocs;
 
-import org.springframework.restdocs.generate.RestDocumentationGenerator;
-import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
+import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
+import com.epages.restdocs.apispec.ResourceSnippet;
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.restdocs.operation.preprocess.OperationRequestPreprocessor;
 import org.springframework.restdocs.operation.preprocess.OperationResponsePreprocessor;
@@ -31,6 +32,8 @@ public class MockMvcRestDocumentationBuilder {
         private ResponseFieldsSnippet responseFieldsSnippets;
         private OperationRequestPreprocessor operationRequestPreprocessor = Preprocessors.preprocessRequest(Preprocessors.prettyPrint());
         private OperationResponsePreprocessor operationResponsePreprocessor = Preprocessors.preprocessResponse(Preprocessors.prettyPrint());
+
+        private ResourceSnippet resourceSnippet;
 
         RestDocumentationResultHandlerBuilder(String identifier) {
             identifier(identifier);
@@ -64,13 +67,28 @@ public class MockMvcRestDocumentationBuilder {
             return this;
         }
 
+        public RestDocumentationResultHandlerBuilder resource(ResourceSnippetParameters resourceSnippetParameters) {
+            resourceSnippet = new ResourceSnippet(resourceSnippetParameters);
+            return this;
+        }
+
         public RestDocumentationResultHandler build() {
-            return MockMvcRestDocumentation.document(
-                    documentationIdentifier,
-                    operationRequestPreprocessor,
-                    operationResponsePreprocessor,
-                    requestFieldsSnippets,
-                    responseFieldsSnippets);
+            if (resourceSnippet != null) {
+                return MockMvcRestDocumentationWrapper.document(
+                        documentationIdentifier,
+                        operationRequestPreprocessor,
+                        operationResponsePreprocessor,
+                        resourceSnippet
+                );
+            } else {
+                return MockMvcRestDocumentationWrapper.document(
+                        documentationIdentifier,
+                        operationRequestPreprocessor,
+                        operationResponsePreprocessor,
+                        requestFieldsSnippets,
+                        responseFieldsSnippets
+                );
+            }
         }
     }
 }
