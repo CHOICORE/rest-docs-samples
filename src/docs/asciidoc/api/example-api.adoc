@@ -1,0 +1,10 @@
+==== 예시 제목
+
+===== 예시 상세
+
+.Request
+include::{snippets}/example-api-tests/examples/http-request.adoc[]
+
+.Response
+include::{snippets}/example-api-tests/examples/http-response.adoc[]
+include::{snippets}/example-api-tests/examples/response-body.adoc[]

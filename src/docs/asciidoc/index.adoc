@@ -1,0 +1,49 @@
+ifndef::snippets[]
+:basedir: {docdir}/../../../
+:snippets: build/generated-snippets
+:sources-root: {basedir}/src
+:resources: {sources-root}/main/resources
+:resources-test: {sources-root}/test/resources
+:java: {sources-root}/main/java
+:java-test: {sources-root}/test/java
+endif::[]
+[background-color="white"]
+= TEST API
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 5
+:toc-title: 목차
+:sectlinks:
+:sectnums:
+:docinfodir: .asciidoctor
+:docinfo: shared
+
+== 개요
+
+이 문서는 Spring Rest Docs 으로 개발자 안내를 위해 작성되었으며, 프로젝트의 산출물 입니다.
+
+=== API 서버 경로
+
+.API 경로 안내
+|===
+|환경|도메인
+|개발서버|http://localhost:8080
+|운영서버|미정
+|===
+
+=== 공통 응답
+
+.Response 결과 공통 사항
+|===
+|필드|필드명
+|data|Response Data
+|status|HTTP Status Code
+|code|결과 Message Code
+|message|결과 Message
+|===
+
+=== API 안내
+
+include::api/example-api.adoc[]
